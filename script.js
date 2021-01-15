@@ -22,6 +22,7 @@ const renderCountry = function (data, className) {
     countriesContainer.style.opacity = 1;
 }
 
+//AJAX API using XMLHttpRequest and based on RestCountries API
 const getCountryDetails = function (country) {
     const request = new XMLHttpRequest();
     request.open('GET', `https://restcountries.eu/rest/v2/name/${country}?fullText=true`);
@@ -68,7 +69,7 @@ const getCountryDetails2 = function (country) {
 };
 */
 
-//Arrow function
+//AJAX API using fetch and Arrow function based on RestCountries API
 const getCountryDetails2 = function (country) {
     console.log(fetch(`https://restcountries.eu/rest/v2/name/${country}?fullText=true`));
 
@@ -100,6 +101,48 @@ const getCountryDetails2 = function (country) {
 // getCountryDetails('USA');
 // getCountryDetails('Canada');
 
-getCountryDetails2('India');
+// getCountryDetails2('India');
 // getCountryDetails2('USA');
 // getCountryDetails2('Canada');
+
+//AJAX API using fetch and Arrow function based on geocode API
+
+const whereAmI = function (lat, lng) {
+    fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`)
+        .then(response => {
+            if (!response.ok) throw new Error(`only 3 request allowed in one secound`);
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+            console.log(`You are in ${data.city},${data.country}`)
+            const country = data.country;
+            return fetch(`https://restcountries.eu/rest/v2/name/${country}?fullText=true`)
+        })
+        .then(response => {
+            return response.json();
+        })
+        .then(data => {
+            console.log(data)
+            const [country] = data
+            console.log(country)
+            renderCountry(country)
+            const [neighbour] = country.borders;
+            if (!neighbour) throw new Error('Neightbour Country not found')
+            return fetch(`https://restcountries.eu/rest/v2/alpha/${neighbour}`)
+        })
+        .then(response => {
+            return response.json()
+        })
+        .then(data => {
+            console.log(data);
+            renderCountry(data, 'neighbour');
+        })
+        .catch(err => {
+            console.error(`Something went wrong. Error message - ${err.message}`);
+        })
+};
+
+whereAmI(19.037, 72.873)
+whereAmI(52.508, 13.381)
+whereAmI(-33.933, 18.474)
