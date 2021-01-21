@@ -168,7 +168,7 @@ const createImage = function (imgPath) {
         });
     });
 };
-
+/*
 let createImg;
 createImage('img/img-1.jpg')
     .then(img => {
@@ -195,3 +195,40 @@ createImage('img/img-1.jpg')
         return wait(2)
     })
     .catch(err => console.error(err.message));
+*/
+
+//Consuming Promise with Asyn/Await and try/catch
+
+const geoLocation = function () {
+    return new Promise(function (response, reject) {
+        navigator.geolocation.getCurrentPosition(response, reject);
+    });
+};
+
+const hereAmI = async function () {
+    try {
+        const currlocation = await geoLocation();
+        console.log(currlocation);
+        const { latitude: lat, longitude: lng } = currlocation.coords;
+        const currPositon = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
+        const dataGeo = await currPositon.json()
+        console.log(dataGeo);
+
+        const res = await fetch(`https://restcountries.eu/rest/v2/name/${dataGeo.country}?fullText=true`);
+        const [data] = await res.json()
+        renderCountry(data);
+
+        const [neighbour] = data.borders
+        console.log(neighbour)
+
+        const neigRes = await fetch(`https://restcountries.eu/rest/v2/alpha/${neighbour}`);
+        const data2 = await neigRes.json();
+        console.log(data2)
+        renderCountry(data2, 'neighbour');
+    } catch (err) {
+        console.error(err.message);
+    }
+
+};
+
+hereAmI()
